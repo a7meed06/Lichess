@@ -270,15 +270,6 @@
             0%, 100% { box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.8); }
             50% { box-shadow: inset 0 0 30px rgba(255, 0, 0, 1); }
         }
-        .square.ai-thinking::after {
-            content: '💭';
-            position: absolute;
-            font-size: 16px;
-            top: 2px;
-            right: 2px;
-            animation: think-bounce 0.5s infinite alternate;
-        }
-        @keyframes think-bounce { from { transform: translateY(0); } to { transform: translateY(-3px); } }
         
         .captured-pieces {
             display: flex;
@@ -420,14 +411,6 @@
         }
         .promotion-piece:hover { background: rgba(233, 69, 96, 0.3); transform: scale(1.2); }
         
-        .qr-code {
-            margin: 15px auto;
-            padding: 15px;
-            background: #fff;
-            border-radius: 10px;
-            display: inline-block;
-        }
-        
         .replay-board {
             display: grid;
             grid-template-columns: repeat(8, 40px);
@@ -466,37 +449,6 @@
             border-radius: 8px;
         }
         
-        .share-section {
-            margin: 15px 0;
-        }
-        .share-link {
-            display: flex;
-            gap: 5px;
-            margin-top: 10px;
-        }
-        .share-link input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.05);
-            color: #fff;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 0.8rem;
-        }
-        
-        .online-info {
-            background: rgba(255,215,0,0.1);
-            border: 1px solid rgba(255,215,0,0.3);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            max-width: 400px;
-            text-align: center;
-        }
-        .online-info h4 { color: #ffd700; margin-bottom: 8px; }
-        .online-info p { font-size: 0.85rem; color: #ccc; line-height: 1.6; }
-        
         @media (max-width: 600px) {
             .landing-title { font-size: 2rem; }
             .mode-card { width: 160px; padding: 20px 15px; }
@@ -519,7 +471,6 @@
 <body>
     <div class="sound-toggle" id="sound-toggle" onclick="toggleSound()">🔊</div>
     
-    <!-- ===== LANDING PAGE ===== -->
     <div class="landing-page" id="landing-page">
         <div class="landing-title">♟️ الشطرنج الملكي</div>
         <div class="landing-subtitle">اختر طريقة اللعب</div>
@@ -548,7 +499,6 @@
         </div>
     </div>
     
-    <!-- ===== GAME PAGE ===== -->
     <div class="game-page" id="game-page">
         <div class="game-header">
             <div class="game-title-small">♟️ الشطرنج الملكي</div>
@@ -583,11 +533,9 @@
         </div>
         
         <div class="captured-pieces" id="captured-black"></div>
-        
         <div class="board-container">
             <div class="board" id="board"></div>
         </div>
-        
         <div class="captured-pieces" id="captured-white"></div>
         
         <div class="move-history" id="move-history"></div>
@@ -620,7 +568,6 @@
         </div>
     </div>
     
-    <!-- Promotion Modal -->
     <div class="modal" id="promotion-modal">
         <div class="modal-content">
             <h2>اختر قطعة الترقية</h2>
@@ -628,7 +575,6 @@
         </div>
     </div>
     
-    <!-- Game Over Modal -->
     <div class="modal" id="gameover-modal">
         <div class="modal-content">
             <h2 id="gameover-title">انتهت اللعبة!</h2>
@@ -638,7 +584,6 @@
         </div>
     </div>
     
-    <!-- Replay Modal -->
     <div class="modal" id="replay-modal">
         <div class="modal-content">
             <h2>▶️ إعادة اللعبة</h2>
@@ -675,12 +620,8 @@
         let kingPositions = {white:[7,4],black:[0,4]};
         let castlingRights = {white:{kingside:true,queenside:true},black:{kingside:true,queenside:true}};
         let enPassantTarget = null, isFlipped = false, gameOver = false, lastMove = null;
-        let gameMode = '2p';
-        let aiLevel = 1;
-        let aiThinking = false;
-        let soundEnabled = true;
-        let timers = { white: 600, black: 600 };
-        let timerInterval = null;
+        let gameMode = '2p', aiLevel = 1, aiThinking = false, soundEnabled = true;
+        let timers = { white: 600, black: 600 }, timerInterval = null;
         let moveStack = [];
         let gameStats = { whiteWins: 0, blackWins: 0, draws: 0, total: 0 };
         let replayIndex = 0, replayPlaying = false, replayInterval = null;
@@ -801,11 +742,16 @@
         
         function initBoard() {
             board = JSON.parse(JSON.stringify(INITIAL_BOARD));
-            currentPlayer = 'white'; selectedSquare = null; validMoves = [];
-            moveHistory = []; capturedPieces = {white:[],black:[]};
+            currentPlayer = 'white';
+            selectedSquare = null;
+            validMoves = [];
+            moveHistory = [];
+            capturedPieces = {white:[],black:[]};
             kingPositions = {white:[7,4],black:[0,4]};
             castlingRights = {white:{kingside:true,queenside:true},black:{kingside:true,queenside:true}};
-            enPassantTarget = null; gameOver = false; lastMove = null;
+            enPassantTarget = null;
+            gameOver = false;
+            lastMove = null;
             moveStack = [];
             timers = { white: 600, black: 600 };
             aiThinking = false;
@@ -813,7 +759,10 @@
             updateTimerDisplay();
             document.getElementById('timer-white').classList.remove('danger');
             document.getElementById('timer-black').classList.remove('danger');
-            renderBoard(); updatePlayerInfo(); updateCapturedPieces(); updateMoveHistory();
+            renderBoard();
+            updatePlayerInfo();
+            updateCapturedPieces();
+            updateMoveHistory();
             startTimer();
             addChatMsg('system', '🔥 بدأت لعبة جديدة!');
         }
@@ -998,136 +947,146 @@
         
         function executeMove(move) {
             playSound(move.isCapture ? 'capture' : 'move');
-            
             board[move.to[0]][move.to[1]] = move.piece;
             board[move.from[0]][move.from[1]] = null;
-            
-            if (move.isEnPassant) {
-                board[move.from[0]][move.to[1]] = null;
-                capturedPieces[currentPlayer].push('p');
-            }
-            
-            if (move.isCapture) {
-                capturedPieces[currentPlayer].push(board[move.to[0]][move.to[1]]);
-            }
-            
+            lastMove = move;
+            if (move.piece.toLowerCase() === 'k') kingPositions[currentPlayer] = [move.to[0], move.to[1]];
+            if (move.isEnPassant) board[move.from[0]][move.to[1]] = null;
             if (move.isCastling) {
                 const homeRow = move.to[0];
-                if (move.isCastling === 'kingside') {
-                    board[homeRow][5] = board[homeRow][7];
-                    board[homeRow][7] = null;
-                } else {
-                    board[homeRow][3] = board[homeRow][0];
-                    board[homeRow][0] = null;
-                }
+                if (move.isCastling === 'kingside') { board[homeRow][5] = board[homeRow][7]; board[homeRow][7] = null; }
+                else { board[homeRow][3] = board[homeRow][0]; board[homeRow][0] = null; }
             }
-            
-            if (move.piece.toLowerCase() === 'k') {
-                kingPositions[currentPlayer] = [move.to[0], move.to[1]];
-                castlingRights[currentPlayer].kingside = false;
-                castlingRights[currentPlayer].queenside = false;
+            if (move.isCapture) {
+                const capturedPiece = move.piece.toUpperCase() === move.piece ? board[move.to[0]][move.to[1]] : PIECES[board[move.to[0]][move.to[1]]];
+                capturedPieces[currentPlayer].push(board[move.to[0]][move.to[1]]);
             }
-            
-            if (move.piece.toLowerCase() === 'r') {
-                if (move.from[1] === 0) castlingRights[currentPlayer].queenside = false;
-                if (move.from[1] === 7) castlingRights[currentPlayer].kingside = false;
-            }
-            
-            enPassantTarget = move.isDoublePawn ? [move.from[0] + (move.to[0] > move.from[0] ? 1 : -1), move.from[1]] : null;
-            
             if (move.piece.toLowerCase() === 'p' && (move.to[0] === 0 || move.to[0] === 7)) {
                 showPromotionModal(move);
                 return;
             }
-            
-            lastMove = move;
             moveHistory.push(move);
-            currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
+            moveStack.push(JSON.parse(JSON.stringify(board)));
+            enPassantTarget = null;
+            if (move.isDoublePawn) enPassantTarget = [move.from[0] + (currentPlayer === 'white' ? 1 : -1), move.from[1]];
+            if (move.piece.toLowerCase() === 'k' || move.piece.toLowerCase() === 'r') {
+                const player = currentPlayer;
+                if (move.piece.toLowerCase() === 'k') {
+                    castlingRights[player].kingside = false;
+                    castlingRights[player].queenside = false;
+                }
+                if (move.piece.toLowerCase() === 'r') {
+                    if (move.from[1] === 0) castlingRights[player].queenside = false;
+                    if (move.from[1] === 7) castlingRights[player].kingside = false;
+                }
+            }
             selectedSquare = null;
             validMoves = [];
-            
+            currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
             updatePlayerInfo();
             updateCapturedPieces();
             updateMoveHistory();
             renderBoard();
-            
             if (isInCheck(currentPlayer)) playSound('check');
-            
-            checkGameOver();
-            
             if (gameMode === 'ai' && currentPlayer === 'black' && !gameOver) {
-                setTimeout(() => makeAIMove(), 1000);
+                setTimeout(() => aiMove(), 500);
             }
+            checkGameOver();
         }
         
         function showPromotionModal(move) {
-            const modal = document.getElementById('promotion-modal');
-            const options = document.getElementById('promotion-options');
-            options.innerHTML = '';
-            
-            const pieces = currentPlayer === 'white' ? ['Q', 'R', 'B', 'N'] : ['q', 'r', 'b', 'n'];
-            
-            pieces.forEach(piece => {
-                const btn = document.createElement('div');
-                btn.className = 'promotion-piece';
-                btn.textContent = PIECES[piece];
-                btn.onclick = () => {
-                    board[move.to[0]][move.to[1]] = piece;
-                    lastMove = move;
-                    moveHistory.push(move);
-                    currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
-                    selectedSquare = null;
-                    validMoves = [];
-                    updatePlayerInfo();
-                    updateCapturedPieces();
-                    updateMoveHistory();
-                    renderBoard();
-                    checkGameOver();
-                    closeModal('promotion-modal');
-                };
-                options.appendChild(btn);
-            });
-            
-            modal.classList.add('show');
+            const options = currentPlayer === 'white' ? ['Q', 'R', 'B', 'N'] : ['q', 'r', 'b', 'n'];
+            document.getElementById('promotion-options').innerHTML = options.map(p => 
+                `<div class="promotion-piece" onclick="promoteSelection('${p}', ${JSON.stringify(move)})">${PIECES[p]}</div>`
+            ).join('');
+            document.getElementById('promotion-modal').classList.add('show');
+        }
+        
+        function promoteSelection(piece, move) {
+            board[move.to[0]][move.to[1]] = piece;
+            moveHistory.push(move);
+            moveStack.push(JSON.parse(JSON.stringify(board)));
+            closeModal('promotion-modal');
+            selectedSquare = null;
+            validMoves = [];
+            currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
+            updatePlayerInfo();
+            updateCapturedPieces();
+            updateMoveHistory();
+            renderBoard();
+            if (isInCheck(currentPlayer)) playSound('check');
+            if (gameMode === 'ai' && currentPlayer === 'black' && !gameOver) {
+                setTimeout(() => aiMove(), 500);
+            }
+            checkGameOver();
         }
         
         function checkGameOver() {
-            const player = currentPlayer;
-            let hasValidMove = false;
-            
-            for (let row = 0; row < 8 && !hasValidMove; row++) {
-                for (let col = 0; col < 8 && !hasValidMove; col++) {
+            let hasValidMoves = false;
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
                     const piece = board[row][col];
-                    if (piece && isOwnPiece(piece, player)) {
-                        if (getValidMoves(row, col).length > 0) hasValidMove = true;
+                    if (piece && isOwnPiece(piece, currentPlayer)) {
+                        if (getValidMoves(row, col).length > 0) {
+                            hasValidMoves = true;
+                            break;
+                        }
+                    }
+                }
+                if (hasValidMoves) break;
+            }
+            if (!hasValidMoves) {
+                gameOver = true;
+                if (isInCheck(currentPlayer)) {
+                    const winner = currentPlayer === 'white' ? 'الأسود' : 'الأبيض';
+                    showGameOver('الكش والموت! ♚', winner + ' فاز!');
+                    updateStats(currentPlayer === 'white' ? 'black' : 'white');
+                    playSound('gameover');
+                } else {
+                    showGameOver('تعادل! 🤝', 'انتهت اللعبة بتعادل');
+                    updateStats('draw');
+                    playSound('gameover');
+                }
+            }
+        }
+        
+        function aiMove() {
+            aiThinking = true;
+            const moves = [];
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const piece = board[row][col];
+                    if (piece && isOwnPiece(piece, 'black')) {
+                        const validMoves = getValidMoves(row, col);
+                        moves.push(...validMoves.map(m => ({...m, score: 0})));
                     }
                 }
             }
-            
-            if (!hasValidMove) {
-                gameOver = true;
-                stopTimer();
-                playSound('gameover');
-                
-                if (isInCheck(player)) {
-                    const winner = player === 'white' ? 'الأسود' : 'الأبيض';
-                    showGameOver('كش مات!', winner + ' فاز بالحركة!');
-                    updateStats(player === 'white' ? 'black' : 'white');
-                } else {
-                    showGameOver('تعادل!', 'اللعبة انتهت بتعادل');
-                    updateStats('draw');
+            for (let move of moves) {
+                if (board[move.to[0]][move.to[1]]) {
+                    const targetPiece = board[move.to[0]][move.to[1]];
+                    move.score += PIECE_VALUES[targetPiece.toLowerCase()] * 10;
                 }
+                if (move.piece.toLowerCase() === 'p' && (move.to[0] === 0 || move.to[0] === 7)) {
+                    move.score += 90;
+                }
+                const state = saveState();
+                board[move.to[0]][move.to[1]] = move.piece;
+                board[move.from[0]][move.from[1]] = null;
+                if (move.piece.toLowerCase() === 'k') kingPositions['black'] = [move.to[0], move.to[1]];
+                if (isInCheck('white')) move.score += 50;
+                if (isInCheck('black')) move.score -= 100;
+                restoreState(state);
+                kingPositions['black'] = [0, 4];
             }
-        }
-        
-        function showGameOver(title, message) {
-            document.getElementById('gameover-title').textContent = title;
-            document.getElementById('gameover-message').textContent = message;
-            document.getElementById('gameover-modal').classList.add('show');
-        }
-        
-        function resetGame() {
-            initBoard();
+            moves.sort((a, b) => {
+                if (aiLevel === 1) return Math.random() - 0.5;
+                if (aiLevel === 2) return b.score - a.score + (Math.random() - 0.5) * 50;
+                return b.score - a.score;
+            });
+            const bestMove = moves[0];
+            aiThinking = false;
+            if (bestMove) executeMove(bestMove);
         }
         
         function updatePlayerInfo() {
@@ -1138,215 +1097,154 @@
         }
         
         function updateCapturedPieces() {
-            document.getElementById('captured-black').innerHTML = capturedPieces.white.map(p => PIECES[p]).join('');
-            document.getElementById('captured-white').innerHTML = capturedPieces.black.map(p => PIECES[p]).join('');
+            const blackCaptured = capturedPieces.white.map(p => PIECES[p]).join('');
+            const whiteCaptured = capturedPieces.black.map(p => PIECES[p]).join('');
+            document.getElementById('captured-black').textContent = blackCaptured;
+            document.getElementById('captured-white').textContent = whiteCaptured;
         }
         
         function updateMoveHistory() {
-            const hist = document.getElementById('move-history');
-            hist.innerHTML = '';
-            
+            let html = '';
             for (let i = 0; i < moveHistory.length; i += 2) {
-                const row = document.createElement('div');
-                row.className = 'move-row';
-                
-                const num = document.createElement('span');
-                num.className = 'move-number';
-                num.textContent = (i / 2 + 1) + '.';
-                row.appendChild(num);
-                
-                const wMove = document.createElement('span');
-                wMove.className = 'move-white';
-                wMove.textContent = moveToAN(moveHistory[i]);
-                row.appendChild(wMove);
-                
-                if (moveHistory[i + 1]) {
-                    const bMove = document.createElement('span');
-                    bMove.className = 'move-black';
-                    bMove.textContent = moveToAN(moveHistory[i + 1]);
-                    row.appendChild(bMove);
-                }
-                
-                hist.appendChild(row);
+                html += `<div class="move-row">
+                    <span class="move-number">${i/2+1}.</span>
+                    <span class="move-white">${moveToNotation(moveHistory[i])}</span>
+                    <span class="move-black">${moveHistory[i+1] ? moveToNotation(moveHistory[i+1]) : ''}</span>
+                </div>`;
             }
-            
-            hist.scrollTop = hist.scrollHeight;
+            document.getElementById('move-history').innerHTML = html;
+            document.getElementById('move-history').scrollTop = document.getElementById('move-history').scrollHeight;
         }
         
-        function moveToAN(move) {
-            const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        function moveToNotation(move) {
+            const cols = 'abcdefgh';
             const from = cols[move.from[1]] + (8 - move.from[0]);
             const to = cols[move.to[1]] + (8 - move.to[0]);
-            return from + '-' + to;
+            return from + to;
         }
         
-        function updateStats(winner) {
-            if (winner === 'white') gameStats.whiteWins++;
-            else if (winner === 'black') gameStats.blackWins++;
-            else gameStats.draws++;
+        function showGameOver(title, message) {
+            document.getElementById('gameover-title').textContent = title;
+            document.getElementById('gameover-message').textContent = message;
+            document.getElementById('gameover-modal').classList.add('show');
+            stopTimer();
+        }
+        
+        function updateStats(result) {
+            if (result === 'white') gameStats.whiteWins++;
+            else if (result === 'black') gameStats.blackWins++;
+            else if (result === 'draw') gameStats.draws++;
             gameStats.total++;
-            
             document.getElementById('stat-white-wins').textContent = gameStats.whiteWins;
             document.getElementById('stat-black-wins').textContent = gameStats.blackWins;
             document.getElementById('stat-draws').textContent = gameStats.draws;
             document.getElementById('stat-total').textContent = gameStats.total;
-            
-            localStorage.setItem('chessStats', JSON.stringify(gameStats));
         }
         
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
-        
-        function addChatMsg(type, msg) {
-            chatMessages.push({ type, msg });
-            const msgEl = document.createElement('div');
-            msgEl.className = 'chat-msg ' + type;
-            msgEl.textContent = msg;
-            document.getElementById('chat-messages').appendChild(msgEl);
-            document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-        }
-        
-        function handleChatKey(e) {
-            if (e.key === 'Enter') sendChat();
-        }
-        
-        function sendChat() {
-            const input = document.getElementById('chat-input');
-            if (input.value.trim()) {
-                addChatMsg(currentPlayer, input.value);
-                input.value = '';
-            }
-        }
-        
-        function makeAIMove() {
-            if (gameMode !== 'ai' || currentPlayer !== 'black' || gameOver) return;
-            
-            aiThinking = true;
-            renderBoard();
-            
-            let legalMoves = [];
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const piece = board[row][col];
-                    if (piece && isOwnPiece(piece, 'black')) {
-                        const moves = getValidMoves(row, col);
-                        legalMoves.push(...moves);
-                    }
-                }
-            }
-            
-            if (legalMoves.length === 0) {
-                checkGameOver();
-                return;
-            }
-            
-            let bestMove = legalMoves[0];
-            let bestScore = -Infinity;
-            
-            for (let move of legalMoves) {
-                let score = evaluateMove(move, aiLevel);
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestMove = move;
-                }
-            }
-            
-            aiThinking = false;
-            executeMove(bestMove);
-        }
-        
-        function evaluateMove(move, level) {
-            const state = saveState();
-            board[move.to[0]][move.to[1]] = move.piece;
-            board[move.from[0]][move.from[1]] = null;
-            
-            let score = 0;
-            
-            if (move.isCapture) score += PIECE_VALUES[board[move.to[0]][move.to[1]].toLowerCase()] * 10;
-            
-            if (level >= 2) {
-                if (isSquareAttacked(move.to, 'white')) score -= 5;
-                score += Math.random() * 10;
-            }
-            
-            if (level >= 3) score += Math.random() * 20;
-            
-            restoreState(state);
-            return score;
+        function resetGame() {
+            document.getElementById('ai-options').classList.remove('show');
+            document.getElementById('mode-cards').style.display = 'flex';
+            initBoard();
         }
         
         function showReplay() {
-            if (moveHistory.length === 0) return;
+            if (moveHistory.length === 0) {
+                alert('لا توجد حركات لإعادتها');
+                return;
+            }
             replayIndex = 0;
             replayPlaying = false;
-            updateReplayBoard();
             document.getElementById('replay-modal').classList.add('show');
+            renderReplayBoard();
         }
         
-        function updateReplayBoard() {
-            const board = document.getElementById('replay-board');
-            board.innerHTML = '';
-            
-            const currentBoard = JSON.parse(JSON.stringify(INITIAL_BOARD));
-            
-            for (let i = 0; i < Math.min(replayIndex, moveHistory.length); i++) {
+        function renderReplayBoard() {
+            const boardEl = document.getElementById('replay-board');
+            boardEl.innerHTML = '';
+            const replayBoard = JSON.parse(JSON.stringify(INITIAL_BOARD));
+            for (let i = 0; i < replayIndex && i < moveHistory.length; i++) {
                 const move = moveHistory[i];
-                currentBoard[move.to[0]][move.to[1]] = move.piece;
-                currentBoard[move.from[0]][move.from[1]] = null;
+                replayBoard[move.to[0]][move.to[1]] = move.piece;
+                replayBoard[move.from[0]][move.from[1]] = null;
             }
-            
             for (let row = 0; row < 8; row++) {
                 for (let col = 0; col < 8; col++) {
                     const square = document.createElement('div');
                     square.className = `replay-square ${(row+col)%2===0?'light':'dark'}`;
-                    if (currentBoard[row][col]) square.textContent = PIECES[currentBoard[row][col]];
-                    board.appendChild(square);
+                    const piece = replayBoard[row][col];
+                    if (piece) square.textContent = PIECES[piece];
+                    boardEl.appendChild(square);
                 }
             }
-            
             document.getElementById('replay-status').textContent = `الحركة ${replayIndex} / ${moveHistory.length}`;
         }
         
         function replayNext() {
             if (replayIndex < moveHistory.length) {
                 replayIndex++;
-                updateReplayBoard();
+                renderReplayBoard();
             }
         }
         
         function replayPrev() {
             if (replayIndex > 0) {
                 replayIndex--;
-                updateReplayBoard();
+                renderReplayBoard();
             }
         }
         
         function replayPlayPause() {
             replayPlaying = !replayPlaying;
-            const btn = document.getElementById('replay-play-btn');
-            
+            document.getElementById('replay-play-btn').textContent = replayPlaying ? '⏸️ إيقاف' : '▶️ تشغيل';
             if (replayPlaying) {
-                btn.textContent = '⏸️ إيقاف';
+                if (replayInterval) clearInterval(replayInterval);
                 replayInterval = setInterval(() => {
-                    if (replayIndex < moveHistory.length) {
-                        replayIndex++;
-                        updateReplayBoard();
-                    } else {
+                    if (replayIndex >= moveHistory.length) {
                         replayPlaying = false;
+                        document.getElementById('replay-play-btn').textContent = '▶️ تشغيل';
                         clearInterval(replayInterval);
-                        btn.textContent = '▶️ تشغيل';
+                    } else {
+                        replayNext();
                     }
-                }, 800);
+                }, 1000);
             } else {
-                btn.textContent = '▶️ تشغيل';
                 if (replayInterval) clearInterval(replayInterval);
             }
         }
         
-        // Load stats on startup
-        const saved = localStorage.getItem('chessStats');
-        if (saved) gameStats = JSON.parse(saved);
+        function addChatMsg(type, text) {
+            chatMessages.push({type, text});
+            const chatEl = document.getElementById('chat-messages');
+            const msgEl = document.createElement('div');
+            msgEl.className = `chat-msg ${type}`;
+            msgEl.textContent = text;
+            chatEl.appendChild(msgEl);
+            chatEl.scrollTop = chatEl.scrollHeight;
+        }
+        
+        function sendChat() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            addChatMsg(currentPlayer, '👤 ' + text);
+            input.value = '';
+        }
+        
+        function handleChatKey(e) {
+            if (e.key === 'Enter') sendChat();
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal('promotion-modal');
+                closeModal('gameover-modal');
+                closeModal('replay-modal');
+            }
+        });
     </script>
 </body>
 </html>
